@@ -21,9 +21,9 @@ const messageSchema = new mongoose.Schema({
     name: String,
     message: String,
     attendance: {
-        type: String,
-        enum: ['Hadir', 'Tidak Hadir', 'Insyaallah'],
-        default: ''
+      type: String,
+      enum: ['Hadir', 'Tidak Hadir', 'Insyaallah', 'Ragu', ''],
+      default: ''
     },
     coupleId: String,
     createdAt: {
@@ -32,14 +32,15 @@ const messageSchema = new mongoose.Schema({
     }
 });
 
+
 const Message = mongoose.model('Message', messageSchema, 'allTheme1');
 
 // POST /messages – simpan pesan
 app.post('/messages', async (req, res) => {
     const { name, message, coupleId, attendance } = req.body;
 
-    if (!coupleId || !name || !message || !attendance) {
-        return res.status(400).json({ error: 'All fields are required.' });
+    if (!coupleId || !name || !message) {
+        return res.status(400).json({ error: 'coupleId, name, and message are required.' });
     }
 
     const newMessage = new Message({ name, message, coupleId, attendance });
@@ -65,21 +66,25 @@ app.get('/messages', async (req, res) => {
 
         if (theme === '2' || theme === '3') {
             // Hitung jumlah attendance
-            const hadir = messages.filter(msg => msg.attendance === 'Hadir').length;
-            const tidakHadir = messages.filter(msg => msg.attendance === 'Tidak Hadir').length;
-            const insyaallah = messages.filter(msg => msg.attendance === 'Insyaallah').length;
+        const hadir = messages.filter(msg => msg.attendance === 'Hadir').length;
+        const tidakHadir = messages.filter(msg => msg.attendance === 'Tidak Hadir').length;
+        const insyaallah = messages.filter(msg => msg.attendance === 'Insyaallah').length;
+        const ragu = messages.filter(msg => msg.attendance === 'Ragu').length;
 
-            res.json({
-                hadir,
-                tidakHadir,
-                insyaallah,
-                messages: messages.map(msg => ({
-                    name: msg.name,
-                    message: msg.message,
-                    attendance: msg.attendance,
-                    createdAt: msg.createdAt
-                }))
-            });
+
+        res.json({
+          hadir,
+          tidakHadir,
+          insyaallah,
+          ragu,
+          messages: messages.map(msg => ({
+            name: msg.name,
+            message: msg.message,
+            attendance: msg.attendance,
+            createdAt: msg.createdAt
+          }))
+        });
+
         } else {
             // Tampilkan attendance & waktu
             res.json(
